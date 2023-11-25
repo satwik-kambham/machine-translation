@@ -1,2 +1,2 @@
 # machine-translation
-English - Hindi Machine Translation
+English - Hindi text translation
