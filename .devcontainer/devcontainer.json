@@ -1,0 +1,6 @@
+{
+    "name": "nlp-devcontainer",
+    "build": {
+        "dockerfile": "../Dockerfile"
+    },
+}
