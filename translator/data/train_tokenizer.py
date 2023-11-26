@@ -5,6 +5,7 @@ from tokenizers.models import BPE
 from tokenizers.trainers import BpeTrainer
 from tokenizers import pre_tokenizers
 from tokenizers.pre_tokenizers import Whitespace
+from tokenizers.processors import TemplateProcessing
 
 from datasets import load_dataset
 
@@ -37,6 +38,14 @@ def train_tokenizer_opus100(subset="en-hi"):
             batch_iterator(lang=lang),
             trainer=trainer,
             length=len(dataset),
+        )
+        tokenizer.post_processor = TemplateProcessing(
+            single="[CLS] $A [SEP]",
+            pair="[CLS] $A [SEP] $B:1 [SEP]:1",
+            special_tokens=[
+                ("[CLS]", tokenizer.token_to_id("[CLS]")),
+                ("[SEP]", tokenizer.token_to_id("[SEP]")),
+            ],
         )
         tokenizer.save(f"tokenizer-{lang}.json")
 
