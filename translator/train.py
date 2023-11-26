@@ -4,6 +4,7 @@ import lightning as L
 
 from data.opus.datamodule import OPUS100DataModule
 from model.lstm import LSTMSeq2Seq
+from model.transformer import TransformerSeq2Seq
 
 
 def train(
@@ -16,13 +17,13 @@ def train(
         tgt_tokenizer_ckpt_path,
     )
     dm.prepare_data()
-    model = LSTMSeq2Seq(
+    model = TransformerSeq2Seq(
         dm.src_tokenizer.get_vocab_size(),
         dm.tgt_tokenizer.get_vocab_size(),
     )
 
     trainer = L.Trainer(
-        max_epochs=10,
+        max_epochs=30,
         fast_dev_run=False,
     )
     trainer.fit(model, dm)
