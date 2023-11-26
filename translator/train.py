@@ -23,7 +23,7 @@ def train(
     )
 
     trainer = L.Trainer(
-        max_epochs=30,
+        max_epochs=5,
         fast_dev_run=False,
     )
     trainer.fit(model, dm)
