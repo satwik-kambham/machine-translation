@@ -9,19 +9,21 @@ class LSTMSeq2Seq(L.LightningModule):
         self,
         src_vocab_size,
         tgt_vocab_size,
-        src_embedding_dim=256,
-        tgt_embedding_dim=256,
-        hidden_dim=256,
+        src_embedding_dim=64,
+        tgt_embedding_dim=64,
+        hidden_dim=128,
         num_layers=1,
-        dropout=0.0,
+        dropout=0.01,
         lr=1e-3,
         weight_decay=1e-2,
         sos_idx=1,
+        eos_idx=2,
         padding_idx=3,
     ):
         super().__init__()
         self.save_hyperparameters()
         self.sos_idx = sos_idx
+        self.eos_idx = eos_idx
         self.hidden_dim = hidden_dim
         self.lr = lr
         self.weight_decay = weight_decay
@@ -54,18 +56,14 @@ class LSTMSeq2Seq(L.LightningModule):
 
         self.criteria = nn.CrossEntropyLoss()
 
-    def forward(self, src, tgt_len, tgt=None):
+    def forward(self, src, tgt, tgt_len):
         x = self.src_embedding(src)
         x, (h, c) = self.encoder_lstm(x)
 
-        decoder_input = torch.full(
-            (src.size(0), 1),
-            self.sos_idx,
-            dtype=torch.long,
-        )
+        decoder_input = tgt[:, 0].unsqueeze(1)
         outputs = []
 
-        for i in range(tgt_len):
+        for i in range(1, tgt_len):
             x = self.tgt_embedding(decoder_input)
             x, (h, c) = self.decoder_lstm(x, (h, c))
             x = self.fc(x)
@@ -81,18 +79,18 @@ class LSTMSeq2Seq(L.LightningModule):
     def training_step(self, batch, batch_idx):
         src = batch["src"]
         tgt = batch["tgt"]
-        logits = self(src, tgt.size(1), tgt)
+        logits = self(src, tgt, tgt.size(1))
         logits = logits.permute(0, 2, 1)
-        loss = self.criteria(logits, tgt)
+        loss = self.criteria(logits, tgt[:, 1:])
         self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
         src = batch["src"]
         tgt = batch["tgt"]
-        logits = self(src, tgt.size(1), tgt)
+        logits = self(src, tgt, tgt.size(1))
         logits = logits.permute(0, 2, 1)
-        loss = self.criteria(logits, tgt)
+        loss = self.criteria(logits, tgt[:, 1:])
         self.log("val_loss", loss)
 
     def configure_optimizers(self):
