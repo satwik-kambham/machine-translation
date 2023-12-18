@@ -176,7 +176,7 @@ class TransformerSeq2Seq(L.LightningModule):
         return {
             "optimizer": optimizer,
             "lr_scheduler": {
-                "lr_scheduler": torch.optim.lr_scheduler.OneCycleLR(
+                "scheduler": torch.optim.lr_scheduler.OneCycleLR(
                     optimizer=optimizer,
                     max_lr=self.hparams.lr,
                     total_steps=self.trainer.estimated_stepping_batches,
