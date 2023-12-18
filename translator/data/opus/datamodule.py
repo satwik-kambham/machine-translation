@@ -18,6 +18,7 @@ class OPUS100DataModule(L.LightningDataModule):
         sos_idx=1,
         eos_idx=2,
         padding_idx=3,
+        max_len=100,
         **kwargs,
     ):
         super().__init__()
@@ -60,8 +61,8 @@ class OPUS100DataModule(L.LightningDataModule):
         src, tgt = zip(*batch)
         src_encodings = self.src_tokenizer.encode_batch(src)
         tgt_encodings = self.tgt_tokenizer.encode_batch(tgt)
-        src_ids = [enc.ids for enc in src_encodings]
-        tgt_ids = [enc.ids for enc in tgt_encodings]
+        src_ids = [enc.ids[: self.hparams.max_len] for enc in src_encodings]
+        tgt_ids = [enc.ids[: self.hparams.max_len] for enc in tgt_encodings]
         src = torch.LongTensor(src_ids).permute(1, 0)
         tgt = torch.LongTensor(tgt_ids).permute(1, 0)
         src_mask, tgt_mask, src_padding_mask, tgt_padding_mask = self.create_mask(
