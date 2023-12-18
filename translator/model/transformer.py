@@ -39,7 +39,7 @@ class TransformerSeq2Seq(L.LightningModule):
         num_layers=3,
         batch_size=32,
         lr=1e-4,
-        weight_decay=1e-2,
+        weight_decay=1e-4,
         sos_idx=1,
         eos_idx=2,
         padding_idx=3,
@@ -70,6 +70,10 @@ class TransformerSeq2Seq(L.LightningModule):
             dropout=dropout,
         )
         self.fc = nn.Linear(embedding_dim, tgt_vocab_size)
+
+        for p in self.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform_(p)
 
         self.criteria = nn.CrossEntropyLoss()
 
@@ -164,8 +168,16 @@ class TransformerSeq2Seq(L.LightningModule):
         self.log("val_loss", loss, batch_size=self.hparams.batch_size)
 
     def configure_optimizers(self):
-        return torch.optim.AdamW(
+        optimizer = torch.optim.AdamW(
             self.parameters(),
             lr=self.hparams.lr,
             weight_decay=self.hparams.weight_decay,
         )
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": torch.optim.lr_scheduler.OneCycleLR(
+                optimizer=optimizer,
+                max_lr=self.hparams.lr,
+                total_steps=self.trainer.estimated_stepping_batches,
+            ),
+        }
