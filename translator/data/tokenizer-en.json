@@ -143,7 +143,7 @@
   "decoder": null,
   "model": {
     "type": "BPE",
-    "dropout": null,
+    "dropout": 0.1,
     "unk_token": "[UNK]",
     "continuing_subword_prefix": null,
     "end_of_word_suffix": null,

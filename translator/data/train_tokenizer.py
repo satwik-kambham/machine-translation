@@ -11,7 +11,12 @@ from datasets import load_dataset
 
 
 def setup_tokenizer():
-    tokenizer = Tokenizer(BPE(unk_token="[UNK]"))
+    tokenizer = Tokenizer(
+        BPE(
+            dropout=0.1,
+            unk_token="[UNK]",
+        )
+    )
 
     tokenizer.pre_tokenizer = pre_tokenizers.Sequence([Whitespace()])
     tokenizer.enable_padding(pad_id=3, pad_token="[PAD]")
