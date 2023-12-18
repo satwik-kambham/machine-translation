@@ -3,7 +3,6 @@ import sys
 import lightning as L
 
 from data.opus.datamodule import OPUS100DataModule
-from model.lstm import LSTMSeq2Seq
 from model.transformer import TransformerSeq2Seq
 
 
@@ -23,7 +22,7 @@ def train(
     )
 
     trainer = L.Trainer(
-        max_epochs=5,
+        max_epochs=20,
         fast_dev_run=False,
     )
     trainer.fit(model, dm)

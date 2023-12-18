@@ -4,7 +4,6 @@ import torch
 import lightning as L
 from tokenizers import Tokenizer
 
-from model.lstm import LSTMSeq2Seq
 from model.transformer import TransformerSeq2Seq
 
 
@@ -36,20 +35,9 @@ if __name__ == "__main__":
 
     while True:
         src = input("Enter source text: ")
-        src = src_tokenizer.encode(src).ids
-        src = torch.tensor(src).unsqueeze(0)
-
-        tgt = torch.tensor([model.sos_idx]).unsqueeze(0)
-
-        for _ in range(100):
-            out = model(src, tgt)
-            out = out.argmax(dim=-1)
-            out = out[:, -1].unsqueeze(0)
-            if out[0, -1] == model.eos_idx:
-                break
-            tgt = torch.cat([tgt, out], dim=-1)
-
-        tgt = tgt.squeeze(0).tolist()
-        print(f"Translated ids: {tgt}")
-        tgt = tgt_tokenizer.decode(tgt)
-        print(f"Translated text: {tgt}")
+        tokenized_text = src_tokenizer.encode(src)
+        src = torch.LongTensor(tokenized_text.ids).view(-1, 1)
+        tgt = model.greedy_decode(src, max_len=100)
+        tgt = tgt.squeeze(1).tolist()
+        tgt_text = tgt_tokenizer.decode(tgt)
+        print(f"Pred: {tgt_text}")
