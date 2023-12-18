@@ -1,6 +1,8 @@
 import sys
 
 import lightning as L
+from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
 
 from data.opus.datamodule import OPUS100DataModule
 from model.transformer import TransformerSeq2Seq
@@ -21,9 +23,28 @@ def train(
         dm.tgt_tokenizer.get_vocab_size(),
     )
 
+    wandb_logger = WandbLogger(
+        project="machine-translation",
+    )
+    lr_monitor = LearningRateMonitor(
+        logging_interval="step",
+        log_momentum=True,
+    )
+    model_ckpt = ModelCheckpoint(
+        monitor="val_loss",
+        mode="min",
+        save_top_k=5,
+        save_last=True,
+    )
     trainer = L.Trainer(
-        max_epochs=20,
+        max_epochs=10,
+        val_check_interval=0.25,
         fast_dev_run=False,
+        logger=wandb_logger,
+        callbacks=[
+            lr_monitor,
+            model_ckpt,
+        ],
     )
     trainer.fit(model, dm)
 
