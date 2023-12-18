@@ -37,6 +37,7 @@ class TransformerSeq2Seq(L.LightningModule):
         dropout=0.1,
         nhead=8,
         num_layers=3,
+        batch_size=32,
         lr=1e-4,
         weight_decay=1e-2,
         sos_idx=1,
@@ -141,7 +142,7 @@ class TransformerSeq2Seq(L.LightningModule):
             logits.reshape(-1, logits.shape[-1]),
             tgt_out.reshape(-1),
         )
-        self.log("train_loss", loss)
+        self.log("train_loss", loss, batch_size=self.hparams.batch_size)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -160,7 +161,7 @@ class TransformerSeq2Seq(L.LightningModule):
             logits.reshape(-1, logits.shape[-1]),
             tgt_out.reshape(-1),
         )
-        self.log("val_loss", loss)
+        self.log("val_loss", loss, batch_size=self.hparams.batch_size)
 
     def configure_optimizers(self):
         return torch.optim.AdamW(
