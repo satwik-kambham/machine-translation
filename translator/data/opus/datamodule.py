@@ -46,10 +46,14 @@ class OPUS100DataModule(L.LightningDataModule):
         tgt_seq_len = tgt.shape[0]
 
         tgt_mask = generate_square_subsequent_mask(tgt_seq_len)
-        src_mask = torch.zeros((src_seq_len, src_seq_len)).type(torch.bool)
+        src_mask = torch.zeros((src_seq_len, src_seq_len)).type(torch.float32)
 
-        src_padding_mask = (src == self.hparams.padding_idx).transpose(0, 1)
-        tgt_padding_mask = (tgt == self.hparams.padding_idx).transpose(0, 1)
+        src_padding_mask = (
+            (src == self.hparams.padding_idx).transpose(0, 1).type(torch.float32)
+        )
+        tgt_padding_mask = (
+            (tgt == self.hparams.padding_idx).transpose(0, 1).type(torch.float32)
+        )
         return src_mask, tgt_mask, src_padding_mask, tgt_padding_mask
 
     def collate_fn(self, batch):
