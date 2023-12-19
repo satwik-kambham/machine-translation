@@ -17,6 +17,9 @@ def setup(
     src_tokenizer = Tokenizer.from_file(src_tokenizer_ckpt_path)
     tgt_tokenizer = Tokenizer.from_file(tgt_tokenizer_ckpt_path)
 
+    src_tokenizer.model.dropout = 0
+    tgt_tokenizer.model.dropout = 0
+
     model = TransformerSeq2Seq.load_from_checkpoint(
         model_ckpt_path,
         map_location="cpu",
